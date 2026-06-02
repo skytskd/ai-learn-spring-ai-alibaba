@@ -1,0 +1,106 @@
+# ============================================================
+#  ai-learn-spring-ai-alibaba：Spring Boot + Spring AI Alibaba 配置
+#  说明：本文件是核心配置文件，控制整个项目的行为
+#  依赖：需要阿里云百炼平台 API Key
+#  申请地址：https://bailian.console.aliyun.com/
+# ============================================================
+
+# ========== 服务器配置 ==========
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+
+# ========== Spring AI Alibaba 配置 ==========
+spring:
+  application:
+    name: ai-learn-spring-ai-alibaba
+
+  # ---------- 阿里云百炼平台（DashScope）配置 ----------
+  ai:
+    dashscope:
+      # ========== API Key 配置 ==========
+      # ⚠️ 请将 your-api-key-here 替换为你的真实 API Key
+      # 获取步骤：
+      #   1. 访问 https://bailian.console.aliyun.com/
+      #   2. 开通模型服务（通义千问等）
+      #   3. 创建 API Key
+      # 环境变量方式：export DASHSCOPE_API_KEY=your-key
+      api-key: ${DASHSCOPE_API_KEY:your-api-key-here}
+
+      # ========== 对话模型配置 ==========
+      chat:
+        options:
+          # qwen-plus：性价比最高，适合大部分场景（推荐学习使用）
+          # qwen-turbo：速度最快，成本最低
+          # qwen-max：能力最强，成本较高
+          # qwen-long：长文本模型，支持千万级 Token
+          model: qwen-plus
+
+          # 温度参数（Temperature）：控制输出的随机性
+          # 范围：0.0 ~ 2.0
+          #   0.0 → 确定性最强（适合代码、数学）
+          #   0.7 → 平衡值，适合一般对话
+          #   1.0+ → 创造性最强（适合写作、头脑风暴）
+          temperature: 0.7
+
+          # Top-P（核采样）：候选词累积概率阈值
+          #   1.0 → 不限制（默认）
+          #   0.1 → 只考虑概率最高的 10% 的词
+          top-p: 0.8
+
+          # 最大输出 Token 数
+          max-tokens: 2048
+
+      # ========== 多模态模型配置 ==========
+      # 通义千问视觉模型（qwen-vl-plus / qwen-vl-max）
+      # 支持图片理解、OCR、图表分析等
+      image:
+        options:
+          model: qwen-vl-plus
+
+      # ========== Embedding 模型配置（向量嵌入用）==========
+      # text-embedding-v2：通义 Embedding 模型
+      # 用于 RAG 场景中的文本向量化
+      embedding:
+        options:
+          model: text-embedding-v2
+
+  # ---------- WebFlux 配置 ----------
+  # SSE（Server-Sent Events）流式接口的超时配置
+  webflux:
+    session:
+      # 7000 分钟 = 约 4.9 天，相当于无超时限制
+      # AI 回答可能是长文本流式输出，需要足够时间
+      timeout: 7000m
+
+  # ---------- 开发工具 ----------
+  devtools:
+    restart:
+      # 开启热重启，修改代码后自动重启
+      enabled: true
+
+# ========== 日志配置 ==========
+logging:
+  level:
+    # 项目自身的日志级别（DEBUG 可以看到详细信息）
+    com.ailearn.alibaba: DEBUG
+    # Spring AI Alibaba 的日志级别
+    com.alibaba.cloud.ai: INFO
+    # Spring Web 的日志级别
+    org.springframework.web: DEBUG
+
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# ========== 自定义配置 ==========
+ai-learn:
+  # 学习模式：learning（学习模式）/ production（生产模式）
+  mode: learning
+
+  # 对话记忆的最大消息数
+  # 每轮对话包括一条用户消息和一条助手消息
+  chat-memory:
+    max-messages: 20

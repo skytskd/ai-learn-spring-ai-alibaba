@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 学习平台 - Spring AI Alibaba</title>
+    <style>
+        :root {
+            --primary: #1677ff;
+            --success: #52c41a;
+            --warning: #faad14;
+            --danger: #ff4d4f;
+            --bg: #f5f5f5;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --text-secondary: #666666;
+            --border: #e8e8e8;
+            --radius: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1677ff, #0958d9);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .header h1 { font-size: 2em; margin-bottom: 8px; }
+        .header p { opacity: 0.85; font-size: 1.1em; }
+
+        .container {
+            max-width: 1000px;
+            margin: 24px auto;
+            padding: 0 16px;
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .card-badge {
+            font-size: 0.75em;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .badge-blue { background: #e6f4ff; color: #1677ff; }
+        .badge-green { background: #f6ffed; color: #52c41a; }
+        .badge-orange { background: #fff7e6; color: #fa8c16; }
+        .badge-purple { background: #f9f0ff; color: #722ed1; }
+
+        .card h3 { font-size: 1.1em; }
+
+        .card .endpoint {
+            display: inline-block;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8em;
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin: 8px 0;
+        }
+
+        .card .desc {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin: 8px 0;
+        }
+
+        .card .try-btn {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 6px 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            text-decoration: none;
+        }
+
+        .card .try-btn:hover { opacity: 0.85; }
+
+        .test-area {
+            display: none;
+            margin-top: 12px;
+        }
+
+        .test-area textarea {
+            width: 100%;
+            height: 60px;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.9em;
+            resize: vertical;
+        }
+
+        .test-area button {
+            margin-top: 8px;
+            padding: 6px 16px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .test-area .result {
+            margin-top: 8px;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            font-size: 0.85em;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 24px;
+            color: var(--text-secondary);
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧠 AI 应用开发学习平台</h1>
+        <p>基于 Spring AI Alibaba + 通义千问 — 从入门到实战</p>
+    </div>
+
+    <div class="container">
+        <div class="module-grid">
+
+            <!-- 第1课：基础对话 -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-badge badge-blue">第1课</span>
+                    <h3>基础对话</h3>
+                </div>
+                <p class="desc">展示 ChatModel、PromptTemplate、ChatClient 三种调用方式。</p>
+                <span class="endpoint">POST /api/chat/model</span><br>
+                <span class="endpoint">POST /api/chat/template</span><br>
+                <span class="endpoint">POST /api/chat/client</span>
+                <div>
+                    <a class="try-btn" href="javascript:void(0)" onclick="toggleTest(this, 'test1')">试试看</a>
+                </div>
+                <div id="test1" class="test-area">
+                    <textarea placeholder="输入你想问的问题...">用 Java 解释什么是依赖注入</textarea>
+                    <button onclick="testApi('/api/chat/client', 'test1')">发送</button>
+                    <div class="result"></div>
+                </div>
+            </div>
+
+            <!-- 第2课：流式对话 -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-badge badge-green">第2课</span>
+                    <h3>流式对话</h3>
+                </div>
+                <p class="desc">通过 SSE 实现逐字输出的打字效果，用户体验更好。</p>
+                <span class="endpoint">GET /api/stream/chat?message=你好</span>
+                <div>
+                    <a class="try-btn" href="javascript:void(0)" onclick="toggleTest(this, 'test2')">试试看</a>
+                </div>
+                <div id="test2" class="test-area">
+                    <textarea placeholder="输入问题...">介绍一下 Spring AI Alibaba</textarea>
+                    <button onclick="testStream('test2')">发送（流式）</button>
+                    <div class="result"></div>
+                </div>
+            </div>
+
+            <!-- 第3课：对话记忆 -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-badge badge-orange">第3课</span>
+                    <h3>对话记忆</h3>
+                </div>
+                <p class="desc">MessageChatMemoryAdvisor 实现多轮对话，AI 记住上下文。</p>
+                <span class="endpoint">POST /api/memory/chat</span>
+                <div>
+                    <a class="try-btn" href="javascript:void(0)" onclick="toggleTest(this, 'test3')">试试看</a>
+                </div>
+                <div id="test3" class="test-area">
+                    <p style="font-size:0.8em;color:#999">先告诉AI你的名字，再问它你叫什么</p>
+                    <textarea placeholder="输入问题...">我叫张三，是一名Java开发工程师</textarea>
+                    <button onclick="testMemory('test3', true)">第1轮：告诉名字</button>
+                    <button onclick="testMemory('test3', false)">第2轮：问名字</button>
+                    <div class="result"></div>
+                </div>
+            </div>
+
+            <!-- 第4课：RAG 检索增强 -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-badge badge-purple">第4课</span>
+                    <h3>RAG 检索增强</h3>
+                </div>
+                <p class="desc">基于本地文档的知识库问答，减少幻觉，提高准确性。</p>
+                <span class="endpoint">POST /api/rag/ask</span><br>
+                <span class="endpoint">POST /api/rag/ask-manual</span>
+                <div>
+                    <a class="try-btn" href="javascript:void(0)" onclick="toggleTest(this, 'test4')">试试看</a>
+                </div>
+                <div id="test4" class="test-area">
+                    <textarea placeholder="问一些知识库中的问题...">阿里云百炼平台的计费方式是怎样的？</textarea>
+                    <button onclick="testApi('/api/rag/ask', 'test4')">发送</button>
+                    <div class="result"></div>
+                </div>
+            </div>
+
+            <!-- 第5课：Agent 工具调用 -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-badge badge-blue">第5课</span>
+                    <h3>Agent 工具调用</h3>
+                </div>
+                <p class="desc">Agent 自动调用天气查询、计算器等工具完成复杂任务。</p>
+                <span class="endpoint">POST /api/agent/chat</span>
+                <div>
+                    <a class="try-btn" href="javascript:void(0)" onclick="toggleTest(this, 'test5')">试试看</a>
+                </div>
+                <div id="test5" class="test-area">
+                    <textarea placeholder="同时问天气和计算...">今天杭州天气怎么样？123*456等于多少？</textarea>
+                    <button onclick="testApi('/api/agent/chat', 'test5')">发送</button>
+                    <div class="result"></div>
+                </div>
+            </div>
+
+            <!-- 第6课：多模态 -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-badge badge-green">第6课</span>
+                    <h3>多模态交互</h3>
+                </div>
+                <p class="desc">上传图片让 AI 分析，支持描述、OCR、图表理解。</p>
+                <span class="endpoint">POST /api/multimodal/analyze</span>
+                <div>
+                    <a class="try-btn" href="javascript:void(0)" onclick="toggleTest(this, 'test6')">试试看</a>
+                </div>
+                <div id="test6" class="test-area">
+                    <input type="file" id="imageInput" accept="image/*" style="margin-bottom:8px">
+                    <textarea placeholder="关于图片的问题（可选）...">请描述这张图片的内容</textarea>
+                    <button onclick="testImage()">上传分析</button>
+                    <div class="result"></div>
+                </div>
+            </div>
+
+            <!-- 第7课：结构化输出 -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-badge badge-orange">第7课</span>
+                    <h3>结构化输出</h3>
+                </div>
+                <p class="desc">LLM 输出 JSON 格式，自动映射为 Java Bean。</p>
+                <span class="endpoint">POST /api/structured/blog-post</span>
+                <div>
+                    <a class="try-btn" href="javascript:void(0)" onclick="toggleTest(this, 'test7')">试试看</a>
+                </div>
+                <div id="test7" class="test-area">
+                    <textarea placeholder="输入博客主题...">Spring AI Alibaba 入门指南</textarea>
+                    <button onclick="testApi('/api/structured/blog-post', 'test7')">发送</button>
+                    <div class="result"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>📖 源码阅读顺序：AiLearnAlibabaApplication → config → service → controller → tool</p>
+        <p>🔧 技术栈：Spring Boot 3.4 + Spring AI Alibaba 1.1.0 + 通义千问</p>
+    </div>
+
+    <script>
+        let memoryConvId = null;
+
+        function toggleTest(btn, id) {
+            const area = document.getElementById(id);
+            area.style.display = area.style.display === 'block' ? 'none' : 'block';
+        }
+
+        async function testApi(url, testId) {
+            const area = document.getElementById(testId);
+            const input = area.querySelector('textarea').value;
+            const resultDiv = area.querySelector('.result');
+            resultDiv.textContent = '⏳ 请求中...';
+
+            try {
+                const resp = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: input })
+                });
+                const data = await resp.json();
+                resultDiv.textContent = data.content || JSON.stringify(data, null, 2);
+            } catch (e) {
+                resultDiv.textContent = '❌ 请求失败：' + e.message;
+            }
+        }
+
+        async function testMemory(testId, isFirst) {
+            const area = document.getElementById(testId);
+            const resultDiv = area.querySelector('.result');
+            let message = isFirst
+                ? area.querySelector('textarea').value
+                : '我叫什么名字？我是什么职业的？';
+
+            resultDiv.textContent = '⏳ 请求中...';
+
+            try {
+                const body = { message: message };
+                if (memoryConvId && !isFirst) body.conversationId = memoryConvId;
+
+                const resp = await fetch('/api/memory/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await resp.json();
+                if (data.conversationId) memoryConvId = data.conversationId;
+                resultDiv.textContent = `[会话: ${memoryConvId}]\n\n${data.content}`;
+            } catch (e) {
+                resultDiv.textContent = '❌ 请求失败：' + e.message;
+            }
+        }
+
+        async function testStream(testId) {
+            const area = document.getElementById(testId);
+            const input = area.querySelector('textarea').value;
+            const resultDiv = area.querySelector('.result');
+            resultDiv.textContent = '';
+
+            try {
+                const eventSource = new EventSource('/api/stream/chat?message=' + encodeURIComponent(input));
+                eventSource.onmessage = (event) => {
+                    resultDiv.textContent += event.data;
+                };
+                eventSource.onerror = () => {
+                    eventSource.close();
+                    if (!resultDiv.textContent) resultDiv.textContent = '❌ 流式请求失败';
+                };
+            } catch (e) {
+                resultDiv.textContent = '❌ 请求失败：' + e.message;
+            }
+        }
+
+        async function testImage() {
+            const area = document.getElementById('test6');
+            const resultDiv = area.querySelector('.result');
+            const fileInput = document.getElementById('imageInput');
+            const question = area.querySelector('textarea').value;
+
+            if (!fileInput.files[0]) {
+                resultDiv.textContent = '⚠️ 请先选择一张图片';
+                return;
+            }
+
+            resultDiv.textContent = '⏳ 分析中...';
+
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+            if (question) formData.append('question', question);
+
+            try {
+                const resp = await fetch('/api/multimodal/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await resp.json();
+                resultDiv.textContent = data.content || JSON.stringify(data, null, 2);
+            } catch (e) {
+                resultDiv.textContent = '❌ 请求失败：' + e.message;
+            }
+        }
+    </script>
+</body>
+</html>

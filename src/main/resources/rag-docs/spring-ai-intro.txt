@@ -1,0 +1,28 @@
+Spring AI Alibaba 介绍
+
+Spring AI Alibaba 是阿里云基于 Spring AI 标准接口开发的 AI 集成框架。
+
+它让 Java 开发者可以像使用 Spring MVC 一样使用 AI 能力——通过注解、自动配置和依赖注入。
+
+核心特性
+
+1. 多模型支持：通义千问（对话）、通义万相（图片生成）、通义 VL（视觉理解）
+2. Spring 生态集成：与 Spring Boot、Spring Cloud 无缝融合
+3. 标准化接口：遵循 Spring AI 的 ChatModel、EmbeddingModel 等标准接口
+4. 企业级能力：内置 RAG、Agent、Function Calling 等高级功能
+5. 中文优化：通义系列模型对中文理解力更强，响应更快
+
+架构设计
+
+Spring AI Alibaba 的架构分为三层：
+- 接口层（Spring AI 标准化 API）：ChatClient、ChatModel、EmbeddingModel
+- 实现层（DashScope 适配器）：将标准 API 请求转换为 DashScope API 调用
+- 平台层（阿里云百炼平台）：提供通义系列模型的 API 服务
+
+与原生 OpenAI 相比的优势
+
+1. 国内访问速度快，延迟低
+2. 中文理解和生成能力更强
+3. 符合国内合规要求
+4. 成本更低（部分模型有免费额度）
+5. 阿里云生态集成（OSS、函数计算等）

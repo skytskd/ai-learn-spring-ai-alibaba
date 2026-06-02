@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ============================================================
+         ai-learn-spring-ai-alibaba：基于 Spring AI Alibaba 的 AI 应用进阶学习项目
+
+         技术栈：
+         - Spring Boot 3.4.5          — 基础框架
+         - Spring AI 1.1.0            — AI 标准接口层
+         - Spring AI Alibaba 1.1.0.0  — 阿里云通义系列模型集成
+         - DashScope                  — 通义千问、通义万相等模型 API
+
+         学习路线（按包结构浏览源码即可）：
+         1. service/BasicChatService         → 基础对话（3种调用方式）
+         2. service/StreamChatService        → 流式对话（SSE）
+         3. service/MemoryChatService        → 对话记忆（ChatMemory）
+         4. service/RagService               → RAG 检索增强生成
+         5. service/AgentService             → Agent 工具调用（Function Calling）
+         6. service/MultimodalService        → 多模态（图片理解）
+         7. service/StructuredOutputService  → 结构化输出（Bean 映射）
+         ============================================================ -->
+
+    <!-- ========== Spring Boot 父 POM ========== -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.4.5</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.ailearn.alibaba</groupId>
+    <artifactId>ai-learn-spring-ai-alibaba</artifactId>
+    <version>1.0.0</version>
+    <name>ai-learn-spring-ai-alibaba</name>
+    <description>基于 Spring AI Alibaba（通义千问）的 AI 应用进阶学习项目</description>
+
+    <!-- ========== 全局版本属性 ========== -->
+    <properties>
+        <java.version>17</java.version>
+        <spring-ai.version>1.1.0</spring-ai.version>
+        <spring-ai-alibaba.version>1.1.0.0</spring-ai-alibaba.version>
+    </properties>
+
+    <!-- ========== 依赖版本管理（BOM）========== -->
+    <!-- BOM（Bill of Materials）：统一管理依赖版本，避免版本冲突 -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring AI Alibaba BOM：阿里云模型集成 -->
+            <dependency>
+                <groupId>com.alibaba.cloud.ai</groupId>
+                <artifactId>spring-ai-alibaba-bom</artifactId>
+                <version>${spring-ai-alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Spring AI BOM：标准 AI 接口 -->
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- ========== 项目依赖 ========== -->
+    <dependencies>
+        <!-- ===== 第一部分：Spring Boot 基础 ===== -->
+
+        <!-- Spring Boot Web：提供 REST API 能力（内嵌 Tomcat） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Spring Boot WebFlux：提供响应式编程 + SSE 流式接口 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+
+        <!-- Spring Boot Test：单元测试 & 集成测试 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- ===== 第二部分：Spring AI Alibaba 核心 ===== -->
+
+        <!--
+            DashScope Starter：接入阿里云百炼平台的入口
+            提供 ChatModel、EmbeddingModel、ChatClient 等核心接口
+            ⚠️ 需要在阿里云百炼平台申请 API Key：
+               https://bailian.console.aliyun.com/
+        -->
+        <dependency>
+            <groupId>com.alibaba.cloud.ai</groupId>
+            <artifactId>spring-ai-alibaba-starter-dashscope</artifactId>
+        </dependency>
+
+        <!-- ===== 第三部分：Spring AI 扩展能力 ===== -->
+
+        <!--
+            Spring AI PDF Reader：PDF 文档解析
+            RAG 系统中用于从 PDF 文件中提取文本
+        -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-pdf-document-reader</artifactId>
+        </dependency>
+
+        <!--
+            Spring AI Tika Document Reader：通用文档解析
+            支持 Word、PPT、Excel、HTML 等多种格式
+        -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-tika-document-reader</artifactId>
+        </dependency>
+
+        <!-- ===== 第四部分：辅助依赖 ===== -->
+
+        <!-- Lombok：减少样板代码（@Data, @Slf4j 等） -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+    <!-- ========== 仓库配置 ========== -->
+    <!-- Spring AI Alibaba 依赖需要从 Spring 和阿里云仓库拉取 -->
+    <repositories>
+        <!-- Spring 官方仓库 -->
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>spring-snapshots</id>
+            <name>Spring Snapshots</name>
+            <url>https://repo.spring.io/snapshot</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
+    <!-- ========== 构建配置 ========== -->
+    <build>
+        <plugins>
+            <!--
+                Spring Boot Maven Plugin
+                功能：
+                1. 打包成可执行的 Fat JAR（java -jar 直接运行）
+                2. compilerArgs -parameters：保留方法参数名，Spring AI 的 @Tool 注解需要
+            -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
