@@ -27,8 +27,8 @@ spring:
       #   1. 访问 https://bailian.console.aliyun.com/
       #   2. 开通模型服务（通义千问等）
       #   3. 创建 API Key
-      # 环境变量方式：export DASHSCOPE_API_KEY=your-key
-      api-key: ${DASHSCOPE_API_KEY:your-api-key-here}
+      # 环境变量方式：export AI_API_KEY=your-key
+      api-key: ${AI_API_KEY:your-api-key-here}
 
       # ========== 对话模型配置 ==========
       chat:

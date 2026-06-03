@@ -91,13 +91,13 @@ ai-learn-spring-ai-alibaba/
 spring:
   ai:
     dashscope:
-      api-key: ${DASHSCOPE_API_KEY:your-api-key-here}
+      api-key: ${AI_API_KEY:your-api-key-here}
 ```
 
 或设置环境变量：
 
 ```bash
-export DASHSCOPE_API_KEY=sk-your-api-key-here
+export AI_API_KEY=sk-your-api-key-here
 ```
 
 ### 3. 启动项目

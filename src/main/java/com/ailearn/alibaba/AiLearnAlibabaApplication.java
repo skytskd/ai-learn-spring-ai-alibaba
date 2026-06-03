@@ -23,7 +23,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * <h2>快速开始</h2>
  * <pre>
  * // 1. 配置 API Key（编辑 application.yml 或设置环境变量）
- * export DASHSCOPE_API_KEY=your-api-key
+ * export AI_API_KEY=your-api-key
  *
  * // 2. 启动项目
  * mvn spring-boot:run
