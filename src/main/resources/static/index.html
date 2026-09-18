@@ -81,6 +81,21 @@
         .badge-green { background: #f6ffed; color: #52c41a; }
         .badge-orange { background: #fff7e6; color: #fa8c16; }
         .badge-purple { background: #f9f0ff; color: #722ed1; }
+        .badge-red { background: #fff1f0; color: #cf1322; }
+
+        .section-title {
+            font-size: 1.3em;
+            margin: 32px 0 16px;
+            padding-left: 12px;
+            border-left: 4px solid var(--primary);
+            color: var(--text);
+        }
+        .section-title .sub {
+            font-size: 0.7em;
+            font-weight: normal;
+            color: var(--text-secondary);
+            margin-left: 8px;
+        }
 
         .card h3 { font-size: 1.1em; }
 
@@ -167,6 +182,7 @@
     </div>
 
     <div class="container">
+        <h2 class="section-title">第一阶段：基础能力<span class="sub">第 1~7 课 · 打通从对话到 Agent 的完整链路</span></h2>
         <div class="module-grid">
 
             <!-- 第1课：基础对话 -->
@@ -301,6 +317,99 @@
                 </div>
             </div>
         </div>
+
+        <!-- ============ 第二阶段：深水区 ============ -->
+        <h2 class="section-title">第二阶段：深水区<span class="sub">第 8~11 课 · 从"能跑"到"能用"</span></h2>
+        <div class="module-grid">
+
+            <!-- 第8课：RAG 调优 -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-badge badge-purple">第8课</span>
+                    <h3>RAG 调优</h3>
+                </div>
+                <p class="desc">查询改写 → 混合检索（向量+BM25）→ RRF 融合 → 重排序。把"朴素 RAG"升级为"进阶 RAG"。</p>
+                <span class="endpoint">POST /api/rag/ask</span><br>
+                <span class="endpoint">POST /api/rag/ask-baseline</span><br>
+                <span class="endpoint">POST /api/rag/explain</span>
+                <div>
+                    <a class="try-btn" href="javascript:void(0)" onclick="toggleTest(this, 'test8')">试试看</a>
+                </div>
+                <div id="test8" class="test-area">
+                    <p style="font-size:0.8em;color:#999">同一问题分别跑强化版与基础版，再点诊断看中间过程</p>
+                    <textarea placeholder="问一个含专有名词的问题...">text-embedding-v2 的计费标准如何？</textarea>
+                    <button onclick="testApi('/api/rag/ask', 'test8')">强化版</button>
+                    <button onclick="testApi('/api/rag/ask-baseline', 'test8')">基础版（对比）</button>
+                    <button onclick="testApi('/api/rag/explain', 'test8')">检索诊断</button>
+                    <div class="result"></div>
+                </div>
+            </div>
+
+            <!-- 第9课：多轮记忆 -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-badge badge-orange">第9课</span>
+                    <h3>分层记忆</h3>
+                </div>
+                <p class="desc">三层架构：滑动窗口（细节）+ 滚动摘要（压缩）+ 长期事实（跨会话）。可查看记忆内部状态。</p>
+                <span class="endpoint">POST /api/memory/chat</span><br>
+                <span class="endpoint">GET /api/memory/state</span>
+                <div>
+                    <a class="try-btn" href="javascript:void(0)" onclick="toggleTest(this, 'test9')">试试看</a>
+                </div>
+                <div id="test9" class="test-area">
+                    <p style="font-size:0.8em;color:#999">先告诉它你的身份，再问它记不记得，最后查看记忆状态</p>
+                    <textarea placeholder="输入...">我叫张三，是一名Java开发工程师，偏好简洁的技术回答</textarea>
+                    <button onclick="testMemory('test9', true)">第1轮：告知身份</button>
+                    <button onclick="testMemory('test9', false)">第2轮：追问验证</button>
+                    <button onclick="testMemoryState('test9')">查看三层记忆状态</button>
+                    <div class="result"></div>
+                </div>
+            </div>
+
+            <!-- 第10课：Agent 编排 -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-badge badge-red">第10课</span>
+                    <h3>Agent 编排</h3>
+                </div>
+                <p class="desc">显式 ReAct 循环 + 三重安全阀（迭代上限 / 死循环检测 / 格式纠错），返回结构化执行轨迹。</p>
+                <span class="endpoint">POST /api/agent/chat-trace</span><br>
+                <span class="endpoint">GET /api/agent/tools</span>
+                <div>
+                    <a class="try-btn" href="javascript:void(0)" onclick="toggleTest(this, 'test10')">试试看</a>
+                </div>
+                <div id="test10" class="test-area">
+                    <p style="font-size:0.8em;color:#999">轨迹会展示每一步的思考、调用的工具、工具返回的结果</p>
+                    <textarea placeholder="需要多步工具调用的问题...">杭州和北京今天天气如何？顺便算一下 123*456 和时间差</textarea>
+                    <button onclick="testTrace('test10')">ReAct 模式（带轨迹）</button>
+                    <button onclick="testApi('/api/agent/chat-simple', 'test10')">原生模式（对比）</button>
+                    <div class="result"></div>
+                </div>
+            </div>
+
+            <!-- 第11课：评估体系 -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-badge badge-purple">第11课</span>
+                    <h3>评估体系</h3>
+                </div>
+                <p class="desc">RAGAS 四指标 + 检索层 Recall@K/MRR/NDCG + 20 条金标准测试集 + 自动失败诊断。</p>
+                <span class="endpoint">GET /api/eval/dataset</span><br>
+                <span class="endpoint">POST /api/eval/smoke</span><br>
+                <span class="endpoint">POST /api/eval/run</span>
+                <div>
+                    <a class="try-btn" href="javascript:void(0)" onclick="toggleTest(this, 'test11')">试试看</a>
+                </div>
+                <div id="test11" class="test-area">
+                    <p style="font-size:0.8em;color:#cc7a00">⚠️ 完整评估约需 120~180 次 LLM 调用，建议先跑冒烟测试（3 样本）</p>
+                    <button onclick="testEval('/api/eval/dataset')">查看测试集（零成本）</button>
+                    <button onclick="testEval('/api/eval/smoke')">冒烟测试（3 样本）</button>
+                    <button onclick="testEval('/api/eval/run')">完整评估（20 样本）</button>
+                    <div class="result"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="footer">
@@ -405,6 +514,148 @@
                 });
                 const data = await resp.json();
                 resultDiv.textContent = data.content || JSON.stringify(data, null, 2);
+            } catch (e) {
+                resultDiv.textContent = '❌ 请求失败：' + e.message;
+            }
+        }
+
+        // ==================== 第9课：分层记忆状态 ====================
+        async function testMemoryState(testId) {
+            const area = document.getElementById(testId);
+            const resultDiv = area.querySelector('.result');
+
+            if (!memoryConvId) {
+                resultDiv.textContent = '⚠️ 请先执行第1轮对话，建立会话';
+                return;
+            }
+
+            resultDiv.textContent = '⏳ 读取中...';
+            try {
+                const resp = await fetch('/api/memory/state?conversationId=' + memoryConvId);
+                const data = await resp.json();
+
+                if (!data.exists) {
+                    resultDiv.textContent = data.message || '会话不存在';
+                    return;
+                }
+
+                let out = `会话: ${data.conversationId}  |  累计轮次: ${data.totalTurns}\n`;
+                out += `\n━━━ Layer 3 长期事实（${(data.layer3_longTermFacts || []).length} 条）━━━\n`;
+                out += (data.layer3_longTermFacts || []).length
+                    ? data.layer3_longTermFacts.map(f => '· ' + f).join('\n')
+                    : '(尚未抽取)';
+                out += `\n\n━━━ Layer 2 历史摘要 ━━━\n${data.layer2_summary}`;
+                out += `\n\n━━━ Layer 1 近期窗口（${data.layer1_size} 条）━━━\n`;
+                out += (data.layer1_window || []).map(m =>
+                    `[${m.role}] ${m.content}`).join('\n');
+
+                resultDiv.textContent = out;
+            } catch (e) {
+                resultDiv.textContent = '❌ 请求失败：' + e.message;
+            }
+        }
+
+        // ==================== 第10课：ReAct 轨迹 ====================
+        async function testTrace(testId) {
+            const area = document.getElementById(testId);
+            const input = area.querySelector('textarea').value;
+            const resultDiv = area.querySelector('.result');
+            resultDiv.textContent = '⏳ ReAct 循环执行中（可能多轮工具调用）...';
+
+            try {
+                const resp = await fetch('/api/agent/chat-trace', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: input })
+                });
+                const data = await resp.json();
+
+                let out = `══════ 最终回答 ══════\n${data.answer}\n`;
+                out += `\n══════ 执行信息 ══════\n`;
+                out += `迭代轮数: ${data.iterationCount}  |  工具调用: ${data.toolCallCount} 次\n`;
+                out += `耗时: ${data.elapsedMs}ms\n`;
+                out += `终止原因: ${data.terminationReason} — ${data.terminationMeaning}\n`;
+
+                out += `\n══════ 执行轨迹 ══════\n`;
+                (data.steps || []).forEach(s => {
+                    out += `\n--- Step ${s.iteration} (${s.elapsedMs}ms) ---\n`;
+                    if (s.thought) out += `Thought:     ${s.thought}\n`;
+                    if (s.action) {
+                        out += `Action:      ${s.action}\n`;
+                        out += `ActionInput: ${s.actionInput}\n`;
+                        out += `Observation: ${s.observation}\n`;
+                    }
+                });
+
+                resultDiv.textContent = out;
+            } catch (e) {
+                resultDiv.textContent = '❌ 请求失败：' + e.message;
+            }
+        }
+
+        // ==================== 第11课：评估 ====================
+        async function testEval(url) {
+            const area = document.getElementById('test11');
+            const resultDiv = area.querySelector('.result');
+            const isGet = url.includes('dataset');
+            resultDiv.textContent = isGet
+                ? '⏳ 读取测试集...'
+                : '⏳ 评估进行中（完整评估需要几分钟，请耐心等待）...';
+
+            try {
+                const resp = await fetch(url, { method: isGet ? 'GET' : 'POST' });
+                const data = await resp.json();
+
+                if (isGet) {
+                    // 测试集：简要展示
+                    let out = `测试集共 ${data.size} 条，分类: ${(data.categories || []).join('、')}\n`;
+                    out += '─'.repeat(50) + '\n';
+                    (data.samples || []).forEach(s => {
+                        out += `\n[${s.id}] (${s.category}) ${s.question}\n`;
+                        out += `  标准答案: ${s.groundTruth}\n`;
+                        out += `  关键短语: ${(s.keyPhrases || []).join(', ')}\n`;
+                    });
+                    resultDiv.textContent = out;
+                    return;
+                }
+
+                // 评估结果
+                let out = `样本数: ${data.sampleCount}   总耗时: ${data.totalElapsedMs}ms\n`;
+                out += `配置: chunkSize=${data.configSnapshot.chunkSize}, `
+                    + `rerank=${data.configSnapshot.enableRerank}, `
+                    + `rerankTopN=${data.configSnapshot.rerankTopN}\n`;
+
+                const r = data.overall.retrieval;
+                const g = data.overall.generation;
+                out += `\n═══ 检索层（找得准不准）═══\n`;
+                out += `  Recall@K     ${r.recall}\n`;
+                out += `  Precision@K  ${r.precision}\n`;
+                out += `  MRR          ${r.mrr}\n`;
+                out += `  NDCG@K       ${r.ndcg}\n`;
+
+                out += `\n═══ 生成层（RAGAS 指标）═══\n`;
+                out += `  Faithfulness      ${g.faithfulness}\n`;
+                out += `  Answer Relevancy  ${g.answerRelevancy}\n`;
+                out += `  Context Precision ${g.contextPrecision}\n`;
+                out += `  Context Recall    ${g.contextRecall}\n`;
+                out += `\n  综合分数: ${data.overall.composite}  平均耗时: ${data.overall.avgElapsedMs}ms\n`;
+
+                out += `\n═══ 分组指标 ═══\n`;
+                Object.keys(data.byCategory || {}).forEach(cat => {
+                    const c = data.byCategory[cat];
+                    out += `  ${cat}: Recall=${c.recall} Faithful=${c.faithfulness} Relev=${c.answerRelevancy}\n`;
+                });
+
+                out += `\n═══ 需要注意的样本（${data.issueCount} 条）═══\n`;
+                if (data.issueCount === 0) {
+                    out += '  全部达标\n';
+                } else {
+                    (data.issues || []).forEach(i => {
+                        out += `\n  [${i.id}] ${i.question}\n    → ${i.diagnosis}\n`;
+                    });
+                }
+
+                resultDiv.textContent = out;
             } catch (e) {
                 resultDiv.textContent = '❌ 请求失败：' + e.message;
             }

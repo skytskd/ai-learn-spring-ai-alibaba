@@ -118,6 +118,24 @@
         </dependency>
 
         <!--
+            Spring AI 文档切分依赖
+            注意：TokenTextSplitter 位于 spring-ai-commons，
+            但 jtokkit（分词器）在部分版本被标记为 optional，
+            因此显式声明，保证文档切分能力可用。
+        -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-commons</artifactId>
+        </dependency>
+
+        <!-- jtokkit：OpenAI 兼容的 BPE 分词器，TokenTextSplitter 底层依赖 -->
+        <dependency>
+            <groupId>com.knuddels</groupId>
+            <artifactId>jtokkit</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+
+        <!--
             Spring AI PDF Reader：PDF 文档解析
             RAG 系统中用于从 PDF 文件中提取文本
         -->

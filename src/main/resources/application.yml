@@ -7,7 +7,17 @@
 
 # ========== 服务器配置 ==========
 server:
-  port: 8080
+  # 端口固定为 8080。
+  #
+  # ⚠️ 踩坑提示：Spring Boot 的「宽松绑定（Relaxed Binding）」会把环境变量
+  #    SERVER__PORT（双下划线）解析为 server.port，且**优先级高于本文件**。
+  #    某些 IDE / 容器 / 宿主进程会注入该变量，导致应用莫名其妙地跑到
+  #    别的端口上，报错信息还是误导性的 "Port xxxxx was already in use"。
+  #
+  #    这里显式用占位符 + 默认值兜底：只要 SERVER__PORT 未设置，
+  #    就一定是 8080；如需临时换端口，用命令行参数 --server.port=9090
+  #    （命令行参数优先级最高，不受环境变量影响）。
+  port: ${APP_SERVER_PORT:8080}
   servlet:
     encoding:
       charset: UTF-8
@@ -30,14 +40,21 @@ spring:
       # 环境变量方式：export AI_API_KEY=your-key
       api-key: ${AI_API_KEY:your-api-key-here}
 
+      # ========== Base URL 配置 ==========
+      # 模型调用地址（Spring AI Alibaba 属性：spring.ai.dashscope.base-url）
+      # 默认为阿里云百炼（DashScope）官方地址
+      # 如需走代理 / 兼容网关，可通过 DASHSCOPE_BASE_URL 环境变量或直接改此处覆盖
+      base-url: ${DASHSCOPE_BASE_URL:https://dashscope.aliyuncs.com}
+
       # ========== 对话模型配置 ==========
       chat:
         options:
-          # qwen-plus：性价比最高，适合大部分场景（推荐学习使用）
-          # qwen-turbo：速度最快，成本最低
-          # qwen-max：能力最强，成本较高
-          # qwen-long：长文本模型，支持千万级 Token
-          model: qwen-plus
+          # 说明：账号内 qwen-plus / qwen-max / qwen-turbo / qwen-flash 等免费额度已耗尽
+          #      （报 403 AllocationQuota.FreeTierOnly）
+          # 实测当前仍可用（200 OK）的模型：qwen3-235b-a22b（Qwen3 235B MoE，能力强）
+          # 其他备选：qwen-plus / qwen-max / qwen-turbo —— 需在百炼控制台充值或关闭「仅使用免费额度」
+          # 注意：非法的模型名（如 qwen3.8-max / qwen3.8-27b）会返回误导性的 400「url error」
+          model: qwen3-235b-a22b
 
           # 温度参数（Temperature）：控制输出的随机性
           # 范围：0.0 ~ 2.0
@@ -92,6 +109,14 @@ logging:
     # Spring Web 的日志级别
     org.springframework.web: DEBUG
 
+    org:
+      springframework:
+        ai:
+          chat:
+            client:
+              advisor: DEBUG
+
+
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
@@ -100,7 +125,78 @@ ai-learn:
   # 学习模式：learning（学习模式）/ production（生产模式）
   mode: learning
 
-  # 对话记忆的最大消息数
-  # 每轮对话包括一条用户消息和一条助手消息
+  # ============================================================
+  #  RAG 配置（第 8 课：RAG 调优）
+  #  调参优先级：chunkSize > enableRerank > rerankTopN > 查询改写
+  #  ⚠️ 每次只改一个参数，并用 /api/eval/run 量化效果
+  # ============================================================
+  rag:
+    # ---------- 文档切分 ----------
+    # 每个分片的目标 token 数（经验区间 200~800）
+    #   太小 → 语义不完整；太大 → 向量被多主题"平均"稀释，检索失准
+    chunk-size: 500
+    # 分片最小字符数，低于此值会与相邻块合并
+    min-chunk-size-chars: 100
+    # 小于该长度的文本不参与向量化，避免噪声块
+    min-chunk-length-to-embed: 5
+    # 单篇文档最多切分块数
+    max-num-chunks: 10000
+
+    # ---------- 各通道候选数 ----------
+    # 稠密（向量）检索每路返回数
+    dense-top-k: 10
+    # 稀疏（BM25）检索每路返回数
+    sparse-top-k: 10
+    # RRF 融合后保留数 —— 即送入重排器的候选规模
+    fusion-top-k: 20
+    # 重排序后最终送入 LLM 的文档数（RAG 中最需要精调的参数之一，经验值 3~5）
+    rerank-top-n: 5
+    # 基础版（对照用）检索条数
+    baseline-top-k: 4
+    # 向量检索相似度阈值，0 表示不过滤
+    similarity-threshold: 0.0
+
+    # ---------- 功能开关 ----------
+    # 重排序：关闭后融合结果直接截断，可用于 A/B 验证重排收益
+    enable-rerank: true
+    # 多查询扩展：提升召回覆盖，代价是检索成本按 (1+count) 倍增长
+    enable-query-expansion: false
+    query-expansion-count: 2
+    # HyDE：生成假想答案文档再检索。效果显著但增加一次 LLM 调用
+    # 导致首字延迟上升，对延迟敏感的场景建议保持 false
+    enable-hyde: false
+
+  # ============================================================
+  #  多轮记忆配置（第 9 课：分层记忆）
+  # ============================================================
+  memory:
+    # Layer 1 滑动窗口消息条数（用户消息+助手回复各算一条，12 条≈6 轮）
+    max-recent-messages: 12
+    # 触发摘要压缩的阈值，必须 >= max-recent-messages
+    summarize-threshold: 20
+    # 两次摘要之间的最小轮次间隔（摘要要调 LLM，不能每轮都触发）
+    summary-interval: 3
+    # 空闲会话存活分钟数，超时清理防止内存无限增长
+    idle-ttl-minutes: 120
+    # 是否抽取长期事实（Layer 3），需额外一次 LLM 调用
+    enable-fact-extraction: true
+
+  # ============================================================
+  #  Agent 编排配置（第 10 课：ReAct 循环）
+  #  ⚠️ max-iterations 是硬性安全阀，绝不能不设
+  # ============================================================
+  agent:
+    # 最大迭代轮数。一次工具调用消耗一轮；
+    # 太小完不成复杂任务，太大成本失控风险高（prompt 随轮次累积，成本约 O(n²)）
+    max-iterations: 8
+    # 是否启用显式 ReAct 循环（false 则用框架原生 Function Calling）
+    enable-re-act: true
+    # 是否在响应里返回执行轨迹（调试开，生产建议关）
+    return-trace: true
+    # 工具调用超时（秒）
+    tool-timeout-seconds: 30
+
+  # 兼容旧配置
   chat-memory:
     max-messages: 20
+

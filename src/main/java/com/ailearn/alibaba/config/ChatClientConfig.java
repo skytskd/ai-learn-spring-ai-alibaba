@@ -1,9 +1,20 @@
 package com.ailearn.alibaba.config;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.chat.client.advisor.api.Advisor;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import reactor.core.scheduler.Scheduler;
+
+import java.util.List;
 
 /**
  * <h1>ChatClientConfig — AI 客户端配置</h1>
@@ -41,7 +52,7 @@ public class ChatClientConfig {
      * @return ChatClient 实例
      */
     @Bean
-    public ChatClient chatClient(ChatModel chatModel) {
+    public ChatClient chatClient(ChatModel chatModel, Advisor simpleLogAdvisor,Advisor safeGuardAdvisor) {
         // ChatClient.builder() 是创建入口
         // .defaultSystem() — 设置默认的系统提示词（所有请求都会带上）
         // .defaultAdvisors() — 设置默认的 Advisor 链（如日志记录、记忆管理等）
@@ -55,6 +66,38 @@ public class ChatClientConfig {
                         3. 当解释技术概念时，使用类比帮助理解
                         4. 代码示例直接可用，包含必要的依赖和配置
                         """)
+                .defaultAdvisors(simpleLogAdvisor,safeGuardAdvisor)
                 .build();
+    }
+
+    //日志Advisor
+    @Bean
+    public Advisor simpleLogAdvisor(){
+        return new SimpleLoggerAdvisor();
+    }
+
+
+    //聊天记忆Advisor用的存储
+    @Bean
+    public ChatMemory chatMemory() {
+        InMemoryChatMemoryRepository repository = new InMemoryChatMemoryRepository();
+        return MessageWindowChatMemory.builder()
+                .chatMemoryRepository(repository)
+                .maxMessages(20)
+                .build();
+    }
+
+//    @Bean
+//    public MessageChatMemoryAdvisor messageChatMemoryAdvisor(ChatMemory chatMemory){
+//        return new MessageChatMemoryAdvisor(chatMemory,"1",1);
+//    }
+
+
+
+    //敏感词Advisor
+    @Bean
+    public Advisor safeGuardAdvisor(){
+        List<String> list = List.of("敏感词1", "敏感词2");
+        return new SafeGuardAdvisor(list,"敏感词提示,请勿输入敏感词",Advisor.DEFAULT_CHAT_MEMORY_PRECEDENCE_ORDER);
     }
 }
